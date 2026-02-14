@@ -12,7 +12,7 @@ export default auth((req) => {
   );
 
   // Define auth routes (login, register)
-  const authRoutes = ["/login"];
+  const authRoutes = ["/login", "/register"];
   const isAuthRoute = authRoutes.some((route) =>
     nextUrl.pathname.startsWith(route),
   );

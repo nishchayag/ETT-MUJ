@@ -5,6 +5,8 @@ const nextConfig = {
     // Optimize package imports for faster builds
     optimizePackageImports: ["lucide-react"],
   },
+  // External packages that should not be bundled
+  serverExternalPackages: ["pdf-parse"],
 };
 
 export default nextConfig;

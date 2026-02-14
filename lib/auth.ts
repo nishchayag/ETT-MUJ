@@ -16,7 +16,6 @@ export const authConfig: NextAuthConfig = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-    // Credentials provider for email/password (can be expanded later)
     Credentials({
       name: "credentials",
       credentials: {
@@ -24,12 +23,40 @@ export const authConfig: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // This is a placeholder - in production, verify against your database
-        // For Phase 1, we focus on OAuth providers
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email and password are required");
         }
-        return null;
+
+        try {
+          await connectDB();
+
+          // Find user and explicitly select password field
+          const user = await User.findOne({
+            email: credentials.email,
+          }).select("+password");
+
+          if (!user || !user.password) {
+            throw new Error("Invalid email or password");
+          }
+
+          const isPasswordValid = await user.comparePassword(
+            credentials.password as string,
+          );
+
+          if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+          }
+
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            image: user.image,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
+          throw error;
+        }
       },
     }),
   ],
